@@ -1,8 +1,10 @@
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.restassured.response.Response;
+import org.testng.Assert;
 import org.testng.annotations.*;
-import io.*;
+import io.restassured.*;
 
 import java.net.URISyntaxException;
 
@@ -62,7 +64,6 @@ public class StartMockService {
                 "  ]\n" +
                 "}");
 
-
         WireMock.stubFor(WireMock.get("/app").willReturn(mockGetAppResponse));
 
     }
@@ -70,9 +71,19 @@ public class StartMockService {
 
     @Test
     public void testEndPoint() throws URISyntaxException{
-      
+        String getAppURl = "http://localhost:"+PORT+"/app";
+        Response response = RestAssured.given().get(getAppURl).then().extract().response();
+        Assert.assertEquals(response.getStatusCode(), 200);
 
 
+    }
+
+
+    @AfterClass
+    public void stopWireMockServer(){
+        if(server.isRunning() && server!=null){
+            server.shutdown();
+        }
     }
 
 
